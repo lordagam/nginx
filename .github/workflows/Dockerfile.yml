@@ -1,19 +1,32 @@
-name: Build and Deploy
+name: Build and Deploy WordPress
 
 on:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    
     steps:
-    - name: Checkout repository
-    - uses: actions/checkout@v3
-    - name: Build the Docker image
-      run: docker build . --file Dockerfile --tag my-image-name:latest
-    - name: run & test Container
-      run: docker run -itd --name war-lidor -p 80:8080 my-image-name:latest
-    - run: sleep 90 && curl localhost:8080
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Build Docker image
+      run: docker build -t my-wordpress-image .
+
+    - name: Push Docker image to a container registry
+      run: |
+        echo ${{ secrets.DOCKER_PASSWORD }} | docker login -u ${{ secrets.DOCKER_USERNAME }} --password-stdin
+        docker tag my-wordpress-image your-docker-username/wordpress:latest
+        docker push your-docker-username/wordpress:latest
+      env:
+        DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+        DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+    - name: Deploy WordPress
+      run: |
+        docker-compose up -d
+      env:
+        WORDPRESS_DB_PASSWORD: ${{ secrets.WP_DB_PASSWORD }}
