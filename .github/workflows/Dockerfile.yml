@@ -14,10 +14,10 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Build Docker image
-      #run: docker build  my-wordpress-image .
-      run: docker build . --file Dockerfile --tag my-image-name:latest
+      run: docker build  my-wordpress-image .
+      #run: docker build . --file Dockerfile --tag my-image-name:latest
     - name: run & test Container
-      run: docker run -itd --name hello-world-war5 -p 8080:8080   my-image-name:latest
+      run: docker run -itd --name hello-world -p 8080:8080   my-wordpress-image:latest
     - run: sleep 75 && curl localhost:8080
     - name: Push Docker image to a container registry
       run: |
